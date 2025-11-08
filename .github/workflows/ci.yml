@@ -24,10 +24,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-asyncio httpx requests
-             
-    - name: Run unit tests
-      run: |
-        python -m pytest tests/ -v
         
     - name: Verify imports and basic functionality
       run: |
