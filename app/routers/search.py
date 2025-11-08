@@ -53,11 +53,10 @@ async def get_exchange_rates():
             if char_code in ['USD', 'EUR']:
                 value = currency.find('Value').text
                 nominal = currency.find('Nominal').text
-                # Конвертируем в число (заменяем запятую на точку)
+                # Конвертирует
                 rate = float(value.replace(',', '.')) / float(nominal)
                 rates[char_code] = rate
         
         return rates
     except Exception as e:
-        #примерные курсы в случае ошибки
         return {"USD": 90.0, "EUR": 98.0}
