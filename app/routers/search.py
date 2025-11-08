@@ -47,7 +47,7 @@ async def get_exchange_rates():
         
         rates = {}
         
-        # Ищем доллары США и евро
+        #Ищет доллары США и евро
         for currency in root.findall('Valute'):
             char_code = currency.find('CharCode').text
             if char_code in ['USD', 'EUR']:
@@ -59,5 +59,5 @@ async def get_exchange_rates():
         
         return rates
     except Exception as e:
-        # Возвращаем примерные курсы в случае ошибки
+        #примерные курсы в случае ошибки
         return {"USD": 90.0, "EUR": 98.0}
