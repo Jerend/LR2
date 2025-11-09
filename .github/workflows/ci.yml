@@ -62,24 +62,34 @@ jobs:
         
     - name: Generate documentation
       run: |
-            # Создаем .nojekyll чтобы отключить обработку Jekyll
-            touch docs/.nojekyll
-            cat > docs/index.html << 'EOF'
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>PriceWatch Documentation</title>
-                <meta http-equiv="refresh" content="0; url=steam_service_docs.html">
-            </head>
-            <body>
-                <p>Redirecting to <a href="steam_service_docs.html">Steam Service Documentation</a></p>
-            </body>
-            </html>
-            EOF
+        python generate_docs.py
+        
+        # Создаем .nojekyll
+        touch docs/.nojekyll
+        
+        # Создаем главную страницу index.html
+        cat > docs/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>PriceWatch Documentation</title>
+            <meta http-equiv="refresh" content="0; url=steam_service_docs.html">
+        </head>
+        <body>
+            <h1>PriceWatch Documentation</h1>
+            <p>Redirecting to <a href="steam_service_docs.html">Steam Service Documentation</a></p>
+            <script>window.location.href = 'steam_service_docs.html';</script>
+        </body>
+        </html>
+        EOF
+    
+        # Проверяем что файлы создались
+        echo "Files in docs directory:"
+        ls -la docs/
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         publish_dir: ./docs
-        external_repository: Jerend/LR2 
+        publish_branch: gh-pages
