@@ -62,9 +62,22 @@ jobs:
         
     - name: Generate documentation
       run: |
-        python generate_docs.py
+            # Создаем .nojekyll чтобы отключить обработку Jekyll
+            touch docs/.nojekyll
+            cat > docs/index.html << 'EOF'
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>PriceWatch Documentation</title>
+                <meta http-equiv="refresh" content="0; url=steam_service_docs.html">
+            </head>
+            <body>
+                <p>Redirecting to <a href="steam_service_docs.html">Steam Service Documentation</a></p>
+            </body>
+            </html>
+            EOF
         
-        
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
