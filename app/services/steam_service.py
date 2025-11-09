@@ -13,6 +13,8 @@ class SteamDataService:
         self.featured_url = "https://store.steampowered.com/api/featuredcategories"
         self.search_url = "https://store.steampowered.com/api/storesearch"
     
+
+    
     async def search_games(self, query: str) -> List[Dict]:
         """Поиск игр по названию в Steam"""
         try:
