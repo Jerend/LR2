@@ -44,42 +44,46 @@ def generate_docs():
 
     # Генерирует HTML
     html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Steam Service Documentation</title>
-        <meta charset="UTF-8">
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 40px; }}
-            .function {{ background: #f5f5f5; padding: 20px; margin: 15px 0; border-radius: 8px; }}
-            .function-name {{ font-weight: bold; color: #2c3e50; font-size: 1.2em; margin-bottom: 10px; }}
-            .doc {{ white-space: pre-wrap; background: white; padding: 15px; border-radius: 5px; }}
-            .timestamp {{ color: #7f8c8d; font-style: italic; margin-top: 30px; }}
-            h1 {{ color: #2c3e50; }}
-        </style>
-    </head>
-    <body>
-        <h1>📚 Steam Service Documentation</h1>
-        <p>Автоматически сгенерированная документация из docstrings</p>
-        
-        {"".join([f'''
-        <div class="function">
-            <div class="function-name">📖 {doc['name']}</div>
-            <div class="doc">{doc['doc'] or 'Нет документации'}</div>
-        </div>
-        ''' for doc in docs])}
-        
-        <div class="timestamp">Сгенерировано: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
-    </body>
-    </html>
-    """
-        
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Steam Service Documentation</title>
+    <meta charset="UTF-8">
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; }}
+        .function {{ background: #f5f5f5; padding: 20px; margin: 15px 0; border-radius: 8px; }}
+        .function-name {{ font-weight: bold; color: #2c3e50; font-size: 1.2em; margin-bottom: 10px; }}
+        .doc {{ white-space: pre-wrap; background: white; padding: 15px; border-radius: 5px; }}
+        .timestamp {{ color: #7f8c8d; font-style: italic; margin-top: 30px; }}
+        h1 {{ color: #2c3e50; }}
+    </style>
+</head>
+<body>
+    <h1>📚 Steam Service Documentation</h1>
+    <p>Автоматически сгенерированная документация из docstrings</p>
+    
+    {"".join([f'''
+    <div class="function">
+        <div class="function-name">📖 {doc['name']}</div>
+        <div class="doc">{doc['doc'] or 'Нет документации'}</div>
+    </div>
+    ''' for doc in docs])}
+    
+    <div class="timestamp">Сгенерировано: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
+</body>
+</html>
+"""
+    
     # Создает папку docs если нет
     os.makedirs('docs', exist_ok=True)
     
     # Сохраняет HTML
     with open('docs/index.html', 'w', encoding='utf-8') as f:
         f.write(html_content)
+    
+    # Создает файл .nojekyll для отключения обработки Jekyll
+    with open('docs/.nojekyll', 'w') as f:
+        f.write('')
     
     print("Documentation generated successfully!")
 

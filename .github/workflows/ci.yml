@@ -2,9 +2,9 @@ name: FastAPI CI/CD
 
 on:
   push:
-    branches: [ main, development]
+    branches: [ main, development ]
   pull_request:
-    branches: [ main]
+    branches: [ main ]
 
 jobs:
   test:
@@ -38,35 +38,45 @@ jobs:
         find app/templates -name "*.html" | head -10
         echo "Templates check completed"
         
-    - name: Start server
+    - name: Generate documentation
       run: |
-        # Запускает сервер в фоне
-        timeout 30s python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 || echo "Server test completed"
+        python generate_docs.py
+        
+    - name: Upload documentation artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/
 
-  docs:
-    runs-on: ubuntu-latest
+  deploy-docs:
     needs: test
+    if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
+    
+    permissions:
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
-        
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        
     - name: Generate documentation
       run: |
         python generate_docs.py
         
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        publish_dir: ./docs
-        publish_branch: gh-pages
+        path: docs/
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
