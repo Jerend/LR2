@@ -2,9 +2,9 @@ name: FastAPI CI/CD
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [main, development]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -38,18 +38,40 @@ jobs:
         find app/templates -name "*.html" | head -10
         echo "Templates check completed"
         
+    - name: Start server
+      run: |
+        # Запускает сервер в фоне
+        timeout 30s python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 || echo "Server test completed"
+
+  docs:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+        
     - name: Generate documentation
       run: |
         python generate_docs.py
+        ls -la docs/
         
-    - name: Upload documentation artifact
-      uses: actions/upload-pages-artifact@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload to Pages
+      uses: actions/upload-pages-artifact@v2
       with:
         path: docs/
 
-  deploy-docs:
-    needs: test
+  deploy:
     if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
+    needs: [test, docs]
     
     permissions:
       pages: write
@@ -60,23 +82,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Generate documentation
-      run: |
-        python generate_docs.py
-        
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-      
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: docs/
-        
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v2

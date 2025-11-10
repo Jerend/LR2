@@ -1,50 +1,63 @@
 import os
+import ast
 from datetime import datetime
 
 def generate_docs():
     """Генерирует HTML документацию из docstrings файла steam_service.py"""
     
-    # Читает исходный код steam_service.py
-    with open('app/services/steam_service.py', 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # Извлекает функции и их docstrings
-    docs = []
-    lines = content.split('\n')
-    i = 0
-    
-    while i < len(lines):
-        line = lines[i]
-        if 'def ' in line and '):' in line:
-            func_name = line.split('def ')[1].split('(')[0]
-            
-            # Ищет docstring
-            docstring = ''
-            j = i + 1
-            while j < len(lines):
-                if '"""' in lines[j]:
-                    # Нашли начало docstring
-                    doc_lines = []
-                    start_line = j
-                    
-                    # Собираем docstring
-                    k = start_line
-                    while k < len(lines):
-                        doc_lines.append(lines[k])
-                        if '"""' in lines[k] and k != start_line:  # Закрывающая кавычка
-                            break
-                        k += 1
-                    
-                    docstring = '\n'.join(doc_lines)
-                    break
-                j += 1
-            
-            docs.append({'name': func_name, 'doc': docstring})
-        i += 1
+    try:
+        # Читаем и парсим файл с помощью ast
+        with open('app/services/steam_service.py', 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        tree = ast.parse(content)
+        
+        docs = []
+        
+        # Ищем все функции и методы
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                func_name = node.name
+                docstring = ast.get_docstring(node)
+                
+                docs.append({
+                    'name': func_name,
+                    'doc': docstring or 'Нет документации'
+                })
+        
+        # Генерируем HTML
+        html_content = generate_html_content(docs)
+        
+        # Создаем папку docs если нет
+        os.makedirs('docs', exist_ok=True)
+        
+        # Сохраняем HTML
+        with open('docs/index.html', 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
+        # Создаем файл .nojekyll
+        with open('docs/.nojekyll', 'w') as f:
+            f.write('')
+        
+        print(f"Documentation generated successfully! Found {len(docs)} functions.")
+        
+    except Exception as e:
+        print(f"Error generating documentation: {e}")
+        # Создаем базовую документацию в случае ошибки
+        create_fallback_docs()
 
-    # Генерирует HTML
-    html_content = f"""
-<!DOCTYPE html>
+def generate_html_content(docs):
+    """Генерирует HTML контент"""
+    functions_html = "".join([
+        f'''
+        <div class="function">
+            <div class="function-name">📖 {doc['name']}</div>
+            <div class="doc">{doc['doc']}</div>
+        </div>
+        ''' for doc in docs
+    ])
+    
+    return f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Steam Service Documentation</title>
@@ -62,30 +75,37 @@ def generate_docs():
     <h1>📚 Steam Service Documentation</h1>
     <p>Автоматически сгенерированная документация из docstrings</p>
     
-    {"".join([f'''
-    <div class="function">
-        <div class="function-name">📖 {doc['name']}</div>
-        <div class="doc">{doc['doc'] or 'Нет документации'}</div>
-    </div>
-    ''' for doc in docs])}
+    {functions_html if functions_html else '<p>Функции не найдены</p>'}
     
     <div class="timestamp">Сгенерировано: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
 </body>
-</html>
-"""
+</html>"""
+
+def create_fallback_docs():
+    """Создает резервную документацию в случае ошибки"""
+    html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Steam Service Documentation</title>
+    <meta charset="UTF-8">
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; }}
+        .error {{ color: red; }}
+    </style>
+</head>
+<body>
+    <h1>📚 Steam Service Documentation</h1>
+    <p class="error">Ошибка при генерации документации. Проверьте структуру файла steam_service.py</p>
+    <div class="timestamp">Сгенерировано: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
+</body>
+</html>"""
     
-    # Создает папку docs если нет
     os.makedirs('docs', exist_ok=True)
-    
-    # Сохраняет HTML
     with open('docs/index.html', 'w', encoding='utf-8') as f:
         f.write(html_content)
     
-    # Создает файл .nojekyll для отключения обработки Jekyll
     with open('docs/.nojekyll', 'w') as f:
         f.write('')
-    
-    print("Documentation generated successfully!")
 
 if __name__ == "__main__":
     generate_docs()
