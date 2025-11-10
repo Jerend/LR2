@@ -13,8 +13,6 @@ class SteamDataService:
         self.featured_url = "https://store.steampowered.com/api/featuredcategories"
         self.search_url = "https://store.steampowered.com/api/storesearch"
     
-
-    
     async def search_games(self, query: str) -> List[Dict]:
         """Поиск игр по названию в Steam"""
         try:
@@ -37,7 +35,7 @@ class SteamDataService:
             return await self._get_fallback_games()
     
     async def _parse_search_results(self, data: Dict) -> List[Dict]:
-        """Обработка"""
+        """Обработка результата парсинга игр"""
         games = []
         
         if 'items' in data:
@@ -51,6 +49,9 @@ class SteamDataService:
         
         return games
     
+    def _test_function(self, item: Dict) -> Optional[Dict]:
+            """Тестовая функция для проверки авто-генерации документации"""
+
     async def _extract_game_from_search(self, item: Dict) -> Optional[Dict]:
         """Извлечение информации"""
         try:
@@ -96,6 +97,7 @@ class SteamDataService:
             logger.error(f"Error extracting game from search: {e}")
             return self._create_basic_game_info(item)
     
+
     def _create_basic_game_info(self, item: Dict) -> Optional[Dict]:
         """Базовая информация об игре из результатов поиска"""
         try:

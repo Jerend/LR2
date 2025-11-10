@@ -51,7 +51,7 @@ def generate_html_content(docs):
     functions_html = "".join([
         f'''
         <div class="function">
-            <div class="function-name">📖 {doc['name']}</div>
+            <div class="function-name">{doc['name']}</div>
             <div class="doc">{doc['doc']}</div>
         </div>
         ''' for doc in docs
@@ -72,7 +72,7 @@ def generate_html_content(docs):
     </style>
 </head>
 <body>
-    <h1>📚 Steam Service Documentation</h1>
+    <h1>Steam Service Documentation</h1>
     <p>Автоматически сгенерированная документация из docstrings</p>
     
     {functions_html if functions_html else '<p>Функции не найдены</p>'}
@@ -94,7 +94,7 @@ def create_fallback_docs():
     </style>
 </head>
 <body>
-    <h1>📚 Steam Service Documentation</h1>
+    <h1>Steam Service Documentation</h1>
     <p class="error">Ошибка при генерации документации. Проверьте структуру файла steam_service.py</p>
     <div class="timestamp">Сгенерировано: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
 </body>
